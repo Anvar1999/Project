@@ -1,0 +1,153 @@
+﻿@page "{slug}"
+@model EC_Website.Web.Pages.Forums.Board.IndexModel
+@inject IViewLocalizer Localizer
+@inject IAuthorizationService Authorization
+
+@{
+    ViewData["Title"] = Model.Board.Title;
+}
+
+@section Head {
+    @{
+        var boardUrl = $"https://ec-hoi-mod.site/{Model.Board.Slug}";
+    }
+
+    <meta name="description" content="Board @Model.Board.Title - Economic Crisis Forum" />
+    <meta name="keywords" content="global strategy, rts, game, hoi4, ec, economic crisis, economic crisis 2013, hoi 4, hoi4, hoi 4, hoi IV, hoi ec, hoi4 ec, mod, hearts of iron 4, hearts of iron IV, economic crisis forum" />
+    <meta property="og:title" content="@Model.Board.Title" />
+    <meta property="og:description" content="Board @Model.Board.Title - Economic Crisis Forum" />
+    <meta property="og:site_name" content="Board @Model.Board.Title - Economic Crisis Forum" />
+    <meta property="og:url" content="@boardUrl" />
+    <meta name="twitter:title" content="@Model.Board.Title" />
+    <meta name="twitter:description" content="Board @Model.Board.Title - Economic Crisis Forum" />
+    <meta name="twitter:card" content="@Model.Board.Title" />
+    <meta name="twitter:site" content="Board @Model.Board.Title - Economic Crisis Forum" />
+
+    <link href="~/css/forum-theme.css" rel="stylesheet" />
+}
+
+<div class="forum">
+    <div class="forum-header">
+        <div class="row">
+            <div class="col-9 col-md-10">
+                <h1>@Model.Board.Title</h1>
+            </div>
+            <div class="col-3 col-md-2">
+                @if ((await Authorization.AuthorizeAsync(User, Policies.CanManageForums)).Succeeded)
+                {
+                    <span class="float-right mt-2">
+                        <a asp-page="../Thread/Create" asp-route-boardId="@Model.Board.Id" class="text-light" data-toggle="tooltip" data-placement="top" title="@Localizer["Add new thread"]"><i class="fas fa-plus-circle fa-lg"></i></a>
+                        <a asp-page="./Edit" asp-route-id="@Model.Board.Id" class="text-light" data-toggle="tooltip" data-placement="top" title="@Localizer["Edit board"]"><i class="fas fa-wrench fa-lg"></i></a>
+                        <a asp-page="./Delete" asp-route-id="@Model.Board.Id" class="text-light" data-toggle="tooltip" data-placement="top" title="@Localizer["Delete board"]"><i class="fas fa-times fa-lg"></i></a>
+                    </span>
+                }
+            </div>
+        </div>
+
+        <ul class="breadcrumb text-primary mt-1 mb-0">
+            <li class="breadcrumb-item"><a asp-page="../Index">@Model.Board.Forum.Title</a></li>
+            <li class="breadcrumb-item"><a asp-page="../Board/Index" asp-route-slug="@Model.Board.Slug">@Model.Board.Title</a></li>
+        </ul>
+    </div>
+
+    <div class="forum-body">
+        <div class="forum-search-panel">
+            <vc:search-box />
+        </div>
+        <div class="table-responsive">
+            <table id="tableforum" class="table table-bordered">
+                <thead class="forum-table-head">
+                    <tr>
+                        <th>
+                            <strong>@Localizer["Thread"]</strong>
+                        </th>
+                        <th>
+                            <strong>@Localizer["Author"]</strong>
+                        </th>
+                        <th>
+                            <strong>@Localizer["Posts"]</strong>
+                        </th>
+                        <th>
+                            <strong>@Localizer["Last Post"]</strong>
+                        </th>
+                        <th style="text-align: center">
+                            <strong>+ @Localizer["Fav"]</strong>
+                        </th>
+                    </tr>
+                    <tr class="forum-category">
+                        <th colspan="3">
+                            <strong>@Model.Board.Title</strong>
+                        </th>
+                        <th colspan="2" style="background-color: teal; text-align:center">
+                            @if (User.Identity.IsAuthenticated && !Model.Board.IsLocked)
+                            {
+                                <a asp-page="../Thread/Create" asp-route-boardId="@Model.Board.Id" style="color: azure">@Localizer["New Thread"]</a>
+                            }
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var thread in Model.PagedThreads.OrderByDescending(i => i.IsPinned))
+                    {
+                        <tr style="color: black">
+                            <td>
+                                @if (thread.IsLocked)
+                                {
+                                    <i class="fas fa-lock" data-toggle="tooltip" data-placement="top" title="@Localizer["This topic locked"]"></i>
+                                }
+
+                                @if (thread.IsPinned)
+                                {
+                                    <i class="fas fa-thumbtack" data-toggle="tooltip" data-placement="top" title="@Localizer["This topic pinned"]"></i>
+                                }
+                                <a asp-page="../Thread/Index" asp-route-slug="@thread.Slug" style="color: saddlebrown">@thread.Title</a>
+                            </td>
+                            <td>
+                                <a asp-page="/User/Index" asp-route-username="@thread.Author.UserName">@thread.Author.UserName</a>
+                            </td>
+                            <td>
+                                <label>@thread.Posts.Count</label>
+                            </td>
+                            <td>
+                                @{
+                                    if (thread.Posts.Count > 0)
+                                    {
+                                        var lastPost = thread.Posts.Last();
+                                        <a asp-page="../Thread/Index" asp-route-slug="@thread.Slug" asp-fragment="@lastPost.Id">@lastPost.Author.UserName - @lastPost.Timestamp.ToShortDateString()</a>
+                                    }
+                                }
+                            </td>
+                            <td style="text-align: center">
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    if (Model.AppUser.FavoriteThreads.Any(i => i.ThreadId == thread.Id))
+                                    {
+                                        <form asp-page-handler="RemoveFromFavoriteThreads" asp-route-threadId="@thread.Id" method="post">
+                                            <button class="btn btn-sm" data-toggle="tooltip" data-placement="top" title="@Localizer["Remove thread to favorites list"]"><i class="fa fa-minus-circle fa-lg text-danger"></i></button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-page-handler="AddToFavoriteThreads" asp-route-threadId="@thread.Id" method="post">
+                                            <button class="btn btn-sm" data-toggle="tooltip" data-placement="top" title="@Localizer["Add thread to favorites list"]"><i class="fa fa-plus-circle fa-lg text-secondary"></i></button>
+                                        </form>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5">
+                            <div id="pagination" class="d-flex">
+                                <pagination class="mx-auto" page-index="@Model.PagedThreads.PageIndex" total-pages="@Model.PagedThreads.TotalPages"
+                                            page-path="/Forums/Board/@Model.Board.Slug" />
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

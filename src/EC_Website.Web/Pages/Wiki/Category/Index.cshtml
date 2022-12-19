@@ -1,0 +1,36 @@
+﻿@page "{slug}"
+@model EC_Website.Web.Pages.Wiki.Category.CategoriesIndexModel
+@inject IViewLocalizer Localizer
+@inject IAuthorizationService Authorization
+
+@{
+    ViewData["Title"] = $"{Localizer["Category"]}: {Model.Category.Name} - Economic Crisis Wiki";
+}
+
+<div>
+    <ul>
+        <li><a class="active" asp-page="./Index" asp-route-slug="@Model.Category.Slug">@Localizer["Read"]</a></li>
+        @if ((await Authorization.AuthorizeAsync(User, Policies.CanManageWikiPages)).Succeeded)
+        {
+            <li><a asp-page="./List">@Localizer["List"]</a></li>
+            <li><a asp-page="./Create">@Localizer["Create"]</a></li>
+            <li><a asp-page="./Edit" asp-route-id="@Model.Category.Id">@Localizer["Edit"]</a></li>
+            <li><a asp-page="./Delete" asp-route-id="@Model.Category.Id">@Localizer["Delete"]</a></li>
+        }
+    </ul>
+</div>
+
+<div>
+    <h1>@Localizer["Category"]: @Model.Category.Name</h1>
+    <h2>@Localizer["Pages in category"] "@Model.Category.Name"</h2>
+    <p>@Localizer["The following"] @Model.Category.WikiPageCategories.Count @Localizer["pages are in this category"]</p>
+    
+    @foreach (var articleCategory in Model.Category.WikiPageCategories)
+    {
+        var titleFirstLetter = articleCategory.WikiPage.Title.First();
+        <h3>@titleFirstLetter</h3>
+        <ul>
+            <li><a asp-page="../Index" asp-route-slug="@articleCategory.WikiPage.Slug">@articleCategory.WikiPage.Title</a></li>
+        </ul>
+    }
+</div>    

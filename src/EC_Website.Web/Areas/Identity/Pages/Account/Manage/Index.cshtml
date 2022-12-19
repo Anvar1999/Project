@@ -1,0 +1,76 @@
+﻿@page
+@model IndexModel
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["Edit Profile"];
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<h4>@ViewData["Title"]</h4>
+<partial name="_StatusMessage" for="StatusMessage" />
+<form id="profile-form" enctype="multipart/form-data" method="post">
+    <div class="row flex-column-reverse flex-sm-row">
+        <div class="col-12 col-sm-7">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="AppUser.UserName"></label>
+                <input asp-for="AppUser.UserName" class="form-control" disabled />
+            </div>
+            <div class="form-group">
+                <label asp-for="AppUser.FirstName"></label>
+                <input asp-for="AppUser.FirstName" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="AppUser.LastName"></label>
+                <input asp-for="AppUser.LastName" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="AppUser.Status"></label>
+                <input asp-for="AppUser.Status" class="form-control emojis" />
+            </div>
+            <div class="form-group">
+                <label asp-for="AppUser.Bio"></label>
+                <textarea asp-for="AppUser.Bio" class="form-control emojis" rows="5"></textarea>
+            </div>
+            <div class="form-group">
+                <label asp-for="AppUser.Email"></label>
+                @if (Model.IsEmailConfirmed)
+                {
+                    <div class="input-group">
+                        <input asp-for="AppUser.Email" class="form-control" readonly="readonly" />
+                        <span class="input-group-prepend" aria-hidden="true"><i class="fas fa-check-circle text-success my-auto"></i></span>
+                    </div>
+                }
+                else
+                {
+                    <input asp-for="AppUser.Email" class="form-control" readonly="readonly" />
+                    <button id="email-verification" type="submit" asp-page-handler="SendVerificationEmail" class="btn btn-link">@Localizer["Send verification email"]</button>
+                }
+                <span asp-validation-for="AppUser.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AppUser.PhoneNumber"></label>
+                <input asp-for="AppUser.PhoneNumber" class="form-control" />
+                <span asp-validation-for="AppUser.PhoneNumber" class="text-danger"></span>
+            </div>
+            <button id="update-profile-button" type="submit" class="btn btn-primary">@Localizer["Save"]</button>
+        </div>
+        <div class="col-12 col-sm-5">
+            <fieldset>
+                <legend>@Localizer["Profile Photo"]</legend>
+                <div>
+                    <img id="uploaded_image" class="rounded" width="225" height="225" src="@Model.AppUser.ProfilePhotoPath" alt="@Model.AppUser.UserName Profile Photo" />
+                </div>
+                <div class="my-2">
+                    <input id="select_image" class="btn" onchange="checkExtension(event)" accept=".jpg,.jpeg,.png,.gif" asp-for="ProfilePhoto" type="file" />
+                    <span id="upload_fail_text" class="text-danger"></span>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

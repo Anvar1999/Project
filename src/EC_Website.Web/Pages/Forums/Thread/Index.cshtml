@@ -1,0 +1,202 @@
+﻿@page "{slug}"
+@model EC_Website.Web.Pages.Forums.Thread.IndexModel
+@inject IViewLocalizer Localizer
+@inject IAuthorizationService Authorization
+@inject RealTimeDataContext RealTimeContext
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = Model.Thread.Title;
+}
+
+@section Head {
+    @{
+        var threadUrl = $"https://ec-hoi-mod.site/{Model.Thread.Slug}";
+    }
+
+    <meta name="author" content="@Model.Thread.Author.UserName" />
+    <meta name="description" content="Thread @Model.Thread.Title - Economic Crisis Forum" />
+    <meta name="keywords" content="global strategy, rts, game, hoi4, ec, economic crisis, economic crisis 2013, hoi 4, hoi4, hoi 4, hoi IV, hoi ec, hoi4 ec, mod, hearts of iron 4, hearts of iron IV, economic crisis forum" />
+    <meta property="og:title" content="@Model.Thread.Title" />
+    <meta property="og:description" content="Thread @Model.Thread.Title - Economic Crisis Forum" />
+    <meta property="og:site_name" content="Thread @Model.Thread.Title - Economic Crisis Forum" />
+    <meta property="og:url" content="@threadUrl" />
+    <meta name="twitter:title" content="@Model.Thread.Title" />
+    <meta name="twitter:description" content="Thread @Model.Thread.Title - Economic Crisis Forum" />
+    <meta name="twitter:creator" content="@Model.Thread.Author.UserName" />
+    <meta name="twitter:card" content="@Model.Thread.Title" />
+    <meta name="twitter:site" content="Thread @Model.Thread.Title - Economic Crisis Forum" />
+
+    <partial name="_SyncfusionScriptsPartial" />
+    <link href="~/css/forum-theme.css" rel="stylesheet" />
+}
+
+<div class="forum">
+    <div class="forum-header">
+        <div class="row">
+            <div class="col-9 col-md-10">
+                <h1>@Model.Thread.Title</h1>
+            </div>
+            <div class="col-3 col-md-2">
+                @if ((await Authorization.AuthorizeAsync(User, Policies.CanManageForums)).Succeeded)
+                {
+                    <span class="float-right mt-2">
+                        <a asp-page="./Edit" asp-route-id="@Model.Thread.Id" class="text-light" data-toggle="tooltip" data-placement="top" title="@Localizer["Edit thread"]"><i class="fas fa-wrench fa-lg"></i></a>
+                        <a asp-page="./Delete" asp-route-id="@Model.Thread.Id" class="text-light" data-toggle="tooltip" data-placement="top" title="@Localizer["Delete thread"]"><i class="fas fa-times fa-lg"></i></a>
+                    </span>
+                }
+            </div>
+        </div>
+
+        <ul class="breadcrumb text-primary mt-1 mb-0">
+            <li class="breadcrumb-item"><a asp-page="../Index">@Model.Thread.Board.Forum.Title</a></li>
+            <li class="breadcrumb-item"><a asp-page="../Board/Index" asp-route-slug="@Model.Thread.Board.Slug">@Model.Thread.Board.Title</a></li>
+            <li class="breadcrumb-item"><a asp-page="../Thread/Index" asp-route-slug="@Model.Thread.Slug">@Model.Thread.Title</a></li>
+        </ul>
+    </div>
+
+    <div class="forum-body">
+        <div class="forum-search-panel">
+            <vc:search-box />
+        </div>
+        <div class="table-responsive">
+            <table id="tableforum" class="table table-bordered">
+                <thead class="forum-table-head">
+                    <tr>
+                        <th width="110">
+                            <strong>@Localizer["Author"]</strong>
+                        </th>
+                        <th>
+                            <strong>@Localizer["Posts"]</strong>
+                        </th>
+                    </tr>
+                    <tr class="forum-category">
+                        <th>
+                        </th>
+                        <th style="background-color: teal; text-align: center">
+                            @if (Model.Thread.IsLocked)
+                            {
+                                <strong>@Localizer["Locked"]</strong>
+                            }
+                            else
+                            {
+                                <a style="color: azure" href="#post_reply"><strong>@Localizer["Post Reply"]</strong></a>
+                            }
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var posts = Model.Posts.OrderBy(i => i.Timestamp).ToList();
+                    }
+                    @foreach (var post in posts)
+                    {
+                        <tr>
+                            <td></td>
+                            <td style="background-color: antiquewhite">
+                                <a role="button" class="btn btn-sm" href="#post_reply" onclick="quoteToPost('@post.Id', '@post.Author.UserName')"><b>@Localizer["Quote"]</b></a>
+                                <span class="float-right">
+                                    <span class="mr-1">@post.Timestamp.ToString("MMM dd yyyy HH:mm")</span>
+
+                                    @if ((await Authorization.AuthorizeAsync(User, Policies.CanBanUsers)).Succeeded)
+                                    {
+                                        <a asp-page="/Admin/Users/Restrict" asp-route-id="@post.Author.Id" asp-route-returnUrl="/Forums/Thread/Index/@Model.Thread.Slug"
+                                           class="text-dark" data-toggle="tooltip" data-placement="top" title="@Localizer["Edit user ban"]">
+                                            <i class="fas fa-ban"></i>
+                                        </a>
+                                    }
+
+                                    @if (User.Identity.Name == post.Author.UserName ||
+                                     (await Authorization.AuthorizeAsync(User, Policies.CanManageForums)).Succeeded)
+                                    {
+
+                                        <a asp-page="./EditPost" asp-route-postId="@post.Id" class="text-dark" data-toggle="tooltip" data-placement="top" title="@Localizer["Edit post"]"><i class="fas fa-wrench"></i></a>
+
+                                        if (post.Id != posts.First().Id)
+                                        {
+                                            <a asp-page="./DeletePost" asp-route-postId="@post.Id" class="text-dark" data-toggle="tooltip" data-placement="top" title="@Localizer["Delete post"]"><i class="fas fa-minus-circle"></i></a>
+                                        }
+                                    }
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                @{
+                                    <div class="img-container" style="cursor: pointer">
+                                        @{
+                                            var userOnline = RealTimeContext.OnlineUsers.Contains(post.Author.UserName);
+                                            var statusColor = userOnline ? "bg-success" : "bg-secondary";
+                                        }
+                                        <div class="status-icon-forum @statusColor"></div>
+                                        <img class="rounded" src="@post.Author.ProfilePhotoPath" alt="@post.Author.UserName photo" style="height: 70px; width: 70px" onclick="window.location = '/User/@post.Author.UserName'" />
+                                    </div>
+                                    <a asp-page="/User/Index" asp-route-username="@post.Author.UserName">@post.Author.UserName</a><br />
+                                    <vc:user-roles user="@post.Author" />
+                                    <vc:user-badges user="@post.Author" />
+                                }
+                            </td>
+                            <td id="@post.Id" class="forum-post">
+                                @Html.Raw(post.Content)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2">
+                            <div id="pagination" class="d-flex">
+                                <pagination class="mx-auto" page-index="@Model.Posts.PageIndex" total-pages="@Model.Posts.TotalPages"
+                                            page-path="/Forums/Thread/@Model.Thread.Slug" />
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="post_reply" class="container-fluid mt-3" style="background-color: black; border-radius: 10px;">
+    @if (User.Identity.IsAuthenticated && !Model.Thread.IsLocked)
+    {
+        var user = await UserManager.GetUserAsync(User);
+        if (user.IsBanned)
+        {
+            <vc:alert-box alert-type="@AlertType.Error" dismissible="true"
+                          message="You banned, and you can not write posts until @user.BanExpirationDate?.ToShortDateString()" />
+        }
+        else
+        {
+            <form method="post" asp-page-handler="AddPost">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <label class="font-weight-bold" style="color: aliceblue">@Localizer["Reply to thread"]</label>
+                <span asp-validation-for="PostContent" class="text-danger"></span>
+                <ejs-richtexteditor id="rich_texteditor" ejs-for="PostContent" height="300">
+                    <e-richtexteditor-toolbarsettings items="@ViewData["toolbar"]" enableFloating="true">
+                    </e-richtexteditor-toolbarsettings>
+                </ejs-richtexteditor>
+                <input type="submit" class="btn btn-light my-2" value="@Localizer["Post Reply"]" />
+            </form>
+        }
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function quoteToPost(postId = "", postAuthorName = "") {
+            const postNode = document.createElement("blockquote");
+            postNode.className = "blockquote p-1";
+            postNode.style = "border-left: 5px solid #f86466";
+            postNode.innerHTML = document.getElementById(`${postId}`).innerHTML;
+
+            const blockquoteFooter = document.createElement("footer");
+            blockquoteFooter.className = "blockquote-footer";
+            blockquoteFooter.innerText = postAuthorName;
+            blockquoteFooter.style = "font-size: 50%";
+            postNode.append(blockquoteFooter);
+
+            document.getElementById("rich_texteditor_rte-edit-view").append(postNode);
+        }
+    </script>
+}

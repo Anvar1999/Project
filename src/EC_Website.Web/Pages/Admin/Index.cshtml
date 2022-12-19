@@ -1,0 +1,51 @@
+﻿@page
+@model EC_Website.Web.Pages.Admin.IndexModel
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["Site Administration"];
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead class="bg-info">
+        <tr class="text-white">
+            <th >
+                @Localizer["Authentication and Authorization"]
+            </th>
+            <th>@Localizer["Action"]</th>
+        </tr>
+        </thead>
+
+        <tbody class="bg-white">
+        <tr>
+            <td>
+                <a class="text-info font-weight-bolder" asp-page="./Users/Index">@Localizer["Users"]</a>
+            </td>
+            <td>
+                <a class="btn btn-sm btn-info" asp-page="./Users/Create" asp-route-returnUrl="/Admin/Users/Index">
+                    <i class="fa fa-plus"></i> &nbsp;@Localizer["Add"]
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a class="text-info font-weight-bolder" asp-page="./UserRoles/Index">@Localizer["User Roles"]</a>
+            </td>
+            <td>
+                <a class="btn btn-sm btn-info" asp-page="./UserRoles/Index"><i class="fa fa-plus"></i> &nbsp;@Localizer["Add"]</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a class="text-info font-weight-bolder" asp-page="./UserBadges/Index">@Localizer["User Badges"]</a>
+            </td>
+            <td>
+                <a class="btn btn-sm btn-info" asp-page="./UserBadges/Create"><i class="fa fa-plus"></i> &nbsp;@Localizer["Add"]</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,28 @@
+﻿@page
+@inject IViewLocalizer Localizer
+
+@model EC_Website.Web.Pages.AgreementModel
+@{
+    ViewData["Title"] = Localizer["Description of the Project"];
+}
+
+@section MainContent {
+    <h1>@Localizer["Description of the Project"]</h1>
+
+    <div class="privacy-policy mt-3 p-1 bg-light">
+        <ul>
+            <li>
+                <b>About Project</b><br />
+                In this project i created a forum like reddit; to discuss about the mod of the game Hearth of Iron economic crisis, basically people can write anything about the game similar to reddit.
+                You can read news about people expirience from the game. Also, it has sign up and sign in page on the menu bar,  when you click to home, it takes you to adminstrator's page.
+                When you click the Forum from menu bar, it will take you to Forums page where Topics and posts, only admin can create topic then other people can write their opinion about particular topic.
+                For example we have here Ideas and Concepts, Coding and Scripting menus where it includes topics like Stalker modding, and wall rework warhammer III.
+                Basically if you see any similar projects they have download page, but I just created the download page, but i did not include the game. There is also about page, where it has information about the mod of the game.
+                It has contact menu, where you can see my email. It also has Description of the Project, where you can read this message. 
+            </li>
+            
+        </ul>   
+
+             
+    </div>
+}

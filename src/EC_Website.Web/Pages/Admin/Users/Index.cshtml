@@ -1,0 +1,90 @@
+@page
+@model EC_Website.Web.Pages.Admin.Users.IndexModel
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["Users"];
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a class="btn btn-sm btn-primary" asp-page="./Create" asp-route-returnUrl="/Admin/Users/Index">
+        <i class="fa fa-plus text-white"></i> @Localizer["Create New"]
+    </a>
+    <span class="float-right mx-2">@Localizer["Total records"]: &nbsp; @Model.TotalUsers</span>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead class="bg-info">
+            <tr class="text-white">
+                <th>
+                    @Html.DisplayNameFor(model => model.Users[0].UserName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Users[0].Email)
+                </th>
+                @*<th>
+                    @Localizer["User Roles"]
+                </th>
+                <th>
+                    @Localizer["User Badges"]
+                </th>*@
+                <th>
+                    @Html.DisplayNameFor(model => model.Users[0].IsBanned)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Users[0].Timestamp)
+                </th>
+                <th>@Localizer["Action"]</th>
+            </tr>
+        </thead>
+
+        <tbody class="bg-white">
+        @foreach (var item in Model.Users)
+        {
+            <tr>
+                <td>
+                    <img src="@item.ProfilePhotoPath" class="rounded-circle" style="width: 30px; height: 30px" alt="Photo" />
+                    @Html.DisplayFor(modelItem => item.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                @*<td>
+                    <vc:user-roles user="item" />
+                </td>
+                <td>
+                    <vc:user-badges user="item" />
+                </td>*@
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsBanned)
+                </td>
+                <td>
+                    @item.Timestamp.ToShortDateString()
+                </td>
+                <td>
+                    <ul class="list-group list-group-horizontal">
+                        <li class="list-group-item p-0 mx-1 border-0">
+                            <a class="btn btn-sm btn-info" asp-page="./Edit" asp-route-id="@item.Id"><i class="fa fa-pencil"></i> &nbsp;@Localizer["Edit"]</a>
+                        </li>
+                        <li class="list-group-item p-0 mx-1 border-0">
+                            <a class="btn btn-sm btn-info" asp-page="./Details" asp-route-id="@item.Id"><i class="fa fa-info"></i> &nbsp;@Localizer["Details"]</a>
+                        </li>
+                        <li class="list-group-item p-0 mx-1 border-0">
+                            <a class="btn btn-sm btn-danger" asp-page="./Delete" asp-route-id="@item.Id"><i class="fa fa-trash"></i> &nbsp;@Localizer["Delete"]</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<div id="pagination" class="d-flex">
+    <pagination class="mx-auto" page-index="@Model.Users.PageIndex"
+                total-pages="@Model.Users.TotalPages"
+                page-path="Users/Index" />
+</div>

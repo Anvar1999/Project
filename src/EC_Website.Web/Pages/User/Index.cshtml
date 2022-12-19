@@ -1,0 +1,77 @@
+﻿@page "{username}"
+@model EC_Website.Web.Pages.User.IndexModel
+@inject IViewLocalizer Localizer
+@inject IAuthorizationService Authorization
+@inject RealTimeDataContext RealTimeContext
+
+@{
+    ViewData["Title"] = Model.AppUser.UserName;
+}
+
+@section Head {
+    @{
+        var imgUrl = $"https://ec-hoi-mod.site{Model.AppUser.ProfilePhotoPath}";
+        var userUrl = $"https://ec-hoi-mod.site/{Model.AppUser.UserName}";
+    }
+
+    <meta name="author" content="@Model.AppUser.UserName" />
+    <meta name="description" content="@Model.AppUser.UserName - @Model.AppUser.Bio" />
+    <meta name="keywords" content="@Model.AppUser.UserName, @Model.AppUser.FirstName, @Model.AppUser.LastName" />
+    <meta name="image" content="@imgUrl" />
+    <meta property="og:title" content="@Model.AppUser.UserName" />
+    <meta property="og:description" content="@Model.AppUser.UserName - @Model.AppUser.Bio" />
+    <meta property="og:site_name" content="User @Model.AppUser.UserName - Hearts of Iron IV: Economic Crisis" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="@imgUrl" />
+    <meta property="og:url" content="@userUrl" />
+    <meta name="twitter:card" content="@Model.AppUser.UserName" />
+    <meta name="twitter:title" content="@Model.AppUser.UserName" />
+    <meta name="twitter:description" content="@Model.AppUser.UserName - @Model.AppUser.Bio" />
+    <meta name="twitter:creator" content="@Model.AppUser.UserName" />
+    <meta name="twitter:site" content="User @Model.AppUser.UserName - Hearts of Iron IV: Economic Crisis" />
+    <meta name="twitter:image" content="@imgUrl" />
+}
+
+<div class="card">
+    <div class="card-header" style="background: url(@Model.AppUser.HeaderPhotoPath) no-repeat; background-size: cover">
+        <div class="img-container">
+            @{
+                var userOnline = RealTimeContext.OnlineUsers.Contains(Model.AppUser.UserName);
+                var statusColor = userOnline ? "bg-success" : "bg-secondary";
+            }
+            <div class="status-icon-user @statusColor"></div>
+            <img class="img-thumbnail img-user-responive" src="@Model.AppUser.ProfilePhotoPath" alt="@Model.AppUser.UserName profile photo" />
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-6 col-md-4">
+                <h3 class="card-title"><b>@Model.AppUser.FirstName @Model.AppUser.LastName</b></h3>
+                <h5 class="card-text">
+                    @@@Model.AppUser.UserName
+                    @if ((await Authorization.AuthorizeAsync(User, Policies.CanBanUsers)).Succeeded)
+                    {
+                        <a asp-page="/Admin/Users/Restrict" asp-route-id="@Model.AppUser.Id" asp-route-returnUrl="/User/Index/@Model.AppUser.UserName"
+                           class="text-dark" data-toggle="tooltip" data-placement="top" title="@Localizer["Edit user ban"]">
+                            <i class="fas fa-ban"></i>
+                        </a>
+                    }
+                </h5>
+                <p>@Localizer["Member since"] @Model.AppUser.Timestamp.ToShortDateString()</p>
+
+                <vc:user-roles user="@Model.AppUser" />
+                <vc:user-badges user="@Model.AppUser" />
+                <hr />
+                @if (User.Identity.Name == Model.AppUser.UserName)
+                {
+                    <a class="btn btn-primary my-3" asp-area="Identity" asp-page="/Account/Manage/Index">@Localizer["Edit Profile"]</a>
+                }
+            </div>
+            <div class="col-6 col-md-8">
+                <p>@Model.AppUser.Status</p>
+                <hr />
+                <p>@Model.AppUser.Bio</p>
+            </div>
+        </div>
+    </div>
+</div>

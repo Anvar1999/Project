@@ -1,0 +1,145 @@
+﻿@inject IViewLocalizer Localizer
+@inject IAuthorizationService Authorization
+@inject RealTimeDataContext RealTimeContext
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewData["Title"]</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @await RenderSectionAsync("Head", required: false)
+
+    <environment include="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+              integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+              crossorigin="anonymous" />
+    </environment>
+
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/lib/emojionearea/emojionearea.min.css" />
+    <script src="https://kit.fontawesome.com/6627613fa4.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-155178868-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'UA-155178868-1');
+    </script>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-black shadow py-2 mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-page="/Index">
+                    <img class="rounded" src="~/img/ec_logo.jpg" alt="Hearts of Iron IV: Economic Crisis" height="32" width="32" />
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <partial name="_LoginPartial" />
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-topbar" asp-page="/Index">@Localizer["Home"]</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-topbar" asp-page="/Forums/Index">@Localizer["Forums"]</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-topbar" asp-page="/Download">@Localizer["Download"]</a>
+                        </li>
+                        @*<li class="nav-item">
+                            <a class="nav-link nav-link-topbar" asp-page="/Wiki/Index" asp-route-slug="Economic_Crisis_Wiki">@Localizer["Wiki"]</a>
+                        </li>*@
+
+                        @if ((await Authorization.AuthorizeAsync(User, Policies.HasAdminRole)).Succeeded)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-danger nav-link-topbar" asp-page="/Admin/Index">@Localizer["Admin"]</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <partial name="_CookieConsentPartial" />
+        <div class="container-fluid">
+            <div class="row">
+                <div class="order-1 order-md-0 col-md-2">
+                    @await RenderSectionAsync("LeftSide", required: false)
+                </div>
+                <div class="order-0 order-md-1 col-md-8">
+                    @await RenderSectionAsync("MainContent", required: false)
+                </div>
+                <div class="order-2 order-md-2 col-md-2">
+                    @await RenderSectionAsync("RightSide", required: false)
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer class="footer bg-black py-5 mt-3">
+        <div class="container">
+            <ul class="nav flex-column">
+                <li class="nav-item"><a class="nav-link text-light pl-0" asp-page="/About">@Localizer["About"]</a></li>
+                <li class="nav-item"><a class="nav-link text-light pl-0" asp-page="/Contact">@Localizer["Contact"]</a></li>
+                <li class="nav-item"><a class="nav-link text-light pl-0" asp-page="/DevelopmentTeam">@Localizer["Development Information"]</a></li>
+                <li class="nav-item"><a class="nav-link text-light pl-0" asp-page="/Agreement">@Localizer["Description of the Project"]</a></li>
+            </ul>
+            <hr class="w-100 border-light" />
+            <span class="text-light">@Localizer["Follow us on"] &nbsp;</span>
+            <ul class="nav">
+                <li class="nav-item"><a class="nav-link text-white" href="https://www.facebook.com/HOI.Economic.Crisis"><i class="fab fa-facebook-f fa-lg"></i></a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="https://vk.com/ec_hoi_mod"><i class="fab fa-vk fa-lg"></i></a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="https://steamcommunity.com/groups/ec_hoi_mod"><i class="fab fa-steam fa-lg"></i></a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="https://www.youtube.com/c/HeartsofIronIVEconomicCrisis2013"><i class="fab fa-youtube fa-lg"></i></a></li>
+            </ul>
+            <div class="float-right w-100"><vc:culture-switcher /></div>
+            <span class="text-muted float-right" style="font-size: 75%">@Localizer["Online users:"] @RealTimeContext.OnlineUsers.Count</span>
+            <span class="text-muted">&copy; 2020 - EC Dev Team <span class="badge badge-danger">BETA</span></span>
+        </div>
+    </footer>
+
+    <environment include="Development">
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/popper/popper.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+                integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+                crossorigin="anonymous">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+                integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+                crossorigin="anonymous">
+        </script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+                integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+                crossorigin="anonymous">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/aspnet-signalr/1.1.4/signalr.js"></script>
+    </environment>
+    <script src="~/lib/emojionearea/emojionearea.min.js"></script>
+    <script src="~/js/site.js"></script>
+    <script src="~/js/signalr-connection.js"></script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+    <ejs-scripts></ejs-scripts>
+</body>
+</html>

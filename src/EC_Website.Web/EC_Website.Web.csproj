@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <StartupObject>EC_Website.Web.Program</StartupObject>
+    <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
+    <CopyRefAssembliesToPublishDirectory>false</CopyRefAssembliesToPublishDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\db_files\**\*" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="12.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="6.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.10" PrivateAssets="All" />
+    <PackageReference Include="SuxrobGM.Sdk.AspNetCore" Version="0.4.0" />
+    <PackageReference Include="Syncfusion.EJ2.AspNet.Core" Version="20.3.0.52" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Pages\Admin\UserBadges\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\EC_Website.Core\EC_Website.Core.csproj" />
+    <ProjectReference Include="..\EC_Website.Infrastructure\EC_Website.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

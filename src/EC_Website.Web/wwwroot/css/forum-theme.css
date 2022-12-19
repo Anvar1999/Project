@@ -1,0 +1,44 @@
+﻿.forum {
+    background-color: black;
+    border: dashed;
+    border-radius: 10px;
+    padding-bottom: 1rem;
+}
+
+    .forum a {
+        color: inherit;
+        font-size: 1rem
+    }
+
+.forum-header {   
+    color: azure;
+    padding: .5rem;
+}
+
+.forum-body {
+    background-color: azure;
+}
+
+.forum-search-panel {
+    background-color: #454242;
+}
+
+.forum-category {
+    background-color: seagreen;
+    color: azure;
+    font-weight: bolder;
+}
+
+.forum-table-head {
+    color: black;
+    border-top: 3px solid black;
+    border-bottom: 3px solid black;
+}
+
+.forum-post {
+    background-color: snow;
+}
+
+.forum-post a {
+    color: mediumslateblue;
+}

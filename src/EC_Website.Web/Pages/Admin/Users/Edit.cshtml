@@ -1,0 +1,106 @@
+@page
+@model EC_Website.Web.Pages.Admin.Users.EditModel
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["Edit User"];
+}
+
+@section Head {
+    <partial name="_SyncfusionScriptsPartial" />
+}
+
+<h1>@Localizer["Edit"]</h1>
+
+<h4>@Localizer["User"] "@Model.AppUser.UserName"</h4>
+<hr />
+<div class="row">
+    <div class="col-md-5">
+        <form method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="AppUser.Id" />
+            <fieldset>
+                <legend>@Localizer["Profile Photo"]</legend>
+                <div>
+                    <img id="uploaded_image" class="rounded" width="225" height="225" src="@Model.AppUser.ProfilePhotoPath" alt="@Model.AppUser.UserName Profile Photo" />
+                </div>
+                <div class="my-2">
+                    <input id="select_image" class="btn" onchange="checkExtension(event)" accept=".jpg,.jpeg,.png,.gif" asp-for="ProfilePhoto" type="file" />
+                    <span id="upload_fail_text" class="text-danger"></span>
+                </div>
+            </fieldset>
+            <div class="form-group">
+                <label asp-for="AppUser.UserName" class="control-label"></label>
+                <input asp-for="AppUser.UserName" class="form-control" />
+                <span asp-validation-for="AppUser.UserName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AppUser.Email" class="control-label"></label>
+                <input asp-for="AppUser.Email" class="form-control" />
+                <span asp-validation-for="AppUser.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AppUser.PhoneNumber" class="control-label"></label>
+                <input asp-for="AppUser.PhoneNumber" class="form-control" />
+                <span asp-validation-for="AppUser.PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AppUser.FirstName" class="control-label"></label>
+                <input asp-for="AppUser.FirstName" class="form-control" />
+                <span asp-validation-for="AppUser.FirstName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AppUser.LastName" class="control-label"></label>
+                <input asp-for="AppUser.LastName" class="form-control" />
+                <span asp-validation-for="AppUser.LastName" class="text-danger"></span>
+            </div>
+
+            <div class="form-check form-check-inline">
+                <label class="form-check-label" asp-for="AppUser.IsBanned"></label>
+                <input class="form-check-input ml-2" asp-for="AppUser.IsBanned" />
+            </div>
+            <div class="form-group">
+                <label asp-for="AppUser.BanExpirationDate" class="control-label"></label>
+                <input asp-for="AppUser.BanExpirationDate" class="form-control" />
+                <span asp-validation-for="AppUser.BanExpirationDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">@Localizer["User Roles"]</label>
+                <ejs-multiselect id="user_roles_assign" dataSource="@ViewData["userRoles"]" placeholder="Add user roles" ejs-for="UserRolesName">
+                    <e-multiselect-fields value="Name"></e-multiselect-fields>
+                </ejs-multiselect>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">@Localizer["User Badges"]</label>
+                <ejs-multiselect id="user_badges_assign" dataSource="@ViewData["userBadges"]" placeholder="Add user badges" ejs-for="UserBadgesName">
+                    <e-multiselect-fields value="Name"></e-multiselect-fields>
+                </ejs-multiselect>
+                <a asp-page="/Admin/UserBadges/Create">@Localizer["Create new badge"]</a>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="AppUser.Status" class="control-label"></label>
+                <input asp-for="AppUser.Status" class="form-control emojis" />
+                <span asp-validation-for="AppUser.Status" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AppUser.Bio" class="control-label"></label>
+                <textarea asp-for="AppUser.Bio" class="form-control emojis" rows="5"></textarea>
+                <span asp-validation-for="AppUser.Bio" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="@Localizer["Save"]" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">@Localizer["Back to List"]</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

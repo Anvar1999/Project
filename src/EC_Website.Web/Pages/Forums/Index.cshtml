@@ -1,0 +1,152 @@
+﻿@page
+@model EC_Website.Web.Pages.Forums.IndexModel
+@inject IViewLocalizer Localizer
+@inject IAuthorizationService Authorization
+
+@{
+    ViewData["Title"] = Localizer["Forums"];
+}
+
+@section Head {
+    <meta name="description" content="Forums - Hearts of Iron IV: Economic Crisis" />
+    <meta name="keywords" content="global strategy, rts, game, hoi4, ec, economic crisis, economic crisis 2013, hoi 4, hoi4, hoi 4, hoi IV, hoi ec, hoi4 ec, mod, hearts of iron 4, hearts of iron IV, economic crisis forum" />
+    <meta property="og:title" content="Forums - Hearts of Iron IV: Economic Crisis" />
+    <meta property="og:description" content="Forums - Hearts of Iron IV: Economic Crisis" />
+    <meta property="og:site_name" content="Forums - Hearts of Iron IV: Economic Crisis" />
+    <meta name="twitter:title" content="Forums - Hearts of Iron IV: Economic Crisis" />
+    <meta name="twitter:description" content="Forums - Hearts of Iron IV: Economic Crisis" />
+    <meta name="twitter:card" content="Forums - Hearts of Iron IV: Economic Crisis" />
+    <meta name="twitter:site" content="Forums - Hearts of Iron IV: Economic Crisis" />
+
+    <link href="~/css/forum-theme.css" rel="stylesheet" />
+}
+
+<div class="forum">
+    <div class="forum-header">
+        <div class="row">
+            <div class="col-10">
+                <h1>@Localizer["Official Forums"]</h1>
+            </div>
+            <div class="col-2">
+                @if ((await Authorization.AuthorizeAsync(User, Policies.HasAdminRole)).Succeeded)
+                {
+                    <span class="float-right mt-3">
+                        <a asp-page="./Create" class="text-light" data-toggle="tooltip" data-placement="top" title="@Localizer["Add new forum"]"><i class="fas fa-plus-circle fa-lg"></i></a>
+                    </span>
+                }
+            </div>
+        </div>
+
+    </div>
+
+    <div class="forum-body">
+        <div class="forum-search-panel">
+            <vc:search-box />
+        </div>
+        <div class="table-responsive">
+            <table id="tableforum" class="table table-bordered">
+                <thead class="forum-table-head">
+                    <tr>
+                        <th>
+                            <strong>@Localizer["Board"]</strong>
+                        </th>
+                        <th>
+                            <strong>@Localizer["Last Thread"]</strong>
+                        </th>
+                        <th>
+                            <strong>@Localizer["Topics"]</strong>
+                        </th>
+                        <th>
+                            <strong>@Localizer["Posts"]</strong>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <tr class="forum-category">
+                            <td colspan="4">
+                                <strong>@Localizer["Your Favorite Threads"]</strong>
+                            </td>
+                        </tr>
+
+                        @if (!Model.FavoriteThreads.Any())
+                        {
+                            <tr style="color: black">
+                                <td colspan="4">
+                                    <span style="color:dimgray; font-size: small">@Localizer["FavoriteThreadsDesc"]</span>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var favoriteThread in Model.FavoriteThreads)
+                            {
+                                <tr style="color: black">
+                                    <td colspan="3">
+                                        <a asp-page="./Thread/Index" asp-route-slug="@favoriteThread.Thread.Slug">@favoriteThread.Thread.Board.Title &gt; @favoriteThread.Thread.Title</a>
+                                    </td>
+                                    <td>
+                                        <form asp-page-handler="RemoveFromFavoriteThreads" asp-route-threadId="@favoriteThread.Thread.Id" method="post">
+                                            <label>@favoriteThread.Thread.Posts.Count</label>
+                                            <span class="float-right">
+                                                <button class="btn btn-sm" data-toggle="tooltip" data-placement="top" title="@Localizer["Remove from favorites list"]"><i class="fas fa-minus-circle"></i></button>
+                                            </span>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+
+                    @foreach (var forum in Model.Forums)
+                    {
+                        <tr class="forum-category">
+                            <td colspan="4">
+                                <div class="row">
+                                    <div class="col-9 col-sm-10">
+                                        <h2>@forum.Title</h2>
+                                    </div>
+                                    <div class="col-3 col-sm-2" style="text-align: right">
+                                        <span class="float-right mt-2">
+                                            @if ((await Authorization.AuthorizeAsync(User, Policies.HasAdminRole)).Succeeded)
+                                            {
+                                                <a asp-page="./Board/Create" asp-route-forumId="@forum.Id" class="text-light" data-toggle="tooltip" data-placement="top" title="@Localizer["Add new board"]"><i class="fas fa-plus-circle"></i></a>
+                                                <a asp-page="./Edit" asp-route-id="@forum.Id" class="text-light" data-toggle="tooltip" data-placement="top" title="@Localizer["Edit forum"]"><i class="fas fa-wrench"></i></a>
+                                                <a asp-page="./Delete" asp-route-id="@forum.Id" class="text-light" data-toggle="tooltip" data-placement="top" title="@Localizer["Delete forum"]"><i class="fas fa-times"></i></a>
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        @foreach (var board in forum.Boards)
+                        {
+                            <tr style="color: black">
+                                <td>
+                                    <h3>
+                                        <a asp-page="./Board/Index" asp-route-slug="@board.Slug" style="color: saddlebrown">@board.Title</a>
+                                    </h3>
+                                </td>
+                                <td>
+                                    @if (board.Threads.Count > 0)
+                                    {
+                                        <a asp-page="./Thread/Index" asp-route-slug="@board.Threads.Last().Slug">@board.Threads.Select(i => i.Title).Last()</a>
+                                    }
+                                </td>
+                                <td>
+                                    <label>@board.Threads.Count()</label>
+                                </td>
+                                <td>
+                                    <label>@board.Threads.Select(i => i.Posts.Count).Sum()</label>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
